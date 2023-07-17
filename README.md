@@ -1,1 +1,1 @@
-# solace-web
+# Solace Web App
