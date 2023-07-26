@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../app/globals.css'
+import '../app/globals.css';
 
 interface Message {
   id: number;
@@ -31,9 +31,9 @@ const ChatUI: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex items-center justify-centers flex-col bg-gray-200">
-      <div className="h-screen flex w-4/12 pt-10 pb-32 flex-col bg-slate-100">
-        <div className="flex-grow p-0 overflow-y-auto">
+    <div className="h-screen flex items-center justify-center bg-gray-200">
+      <div className="w-96 pt-48 flex flex-col bg-slate-100 rounded-lg shadow-lg">
+        <div className="flex-grow p-4 overflow-y-auto">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -45,17 +45,17 @@ const ChatUI: React.FC = () => {
             </div>
           ))}
         </div>
-        <div className="flex items-center p-2 rounded-xl bg-gray-100">
+        <div className="flex items-center p-4 bg-gray-100 rounded-b-lg">
           <input
             type="text"
             value={inputValue}
             onChange={handleInputChange}
             placeholder="Type your message..."
-            className="flex-grow p-4 border text-black border-gray-300 rounded mr-4"
+            className="flex-grow p-2 border border-gray-300 text-black rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
           <button
             onClick={handleSendMessage}
-            className="px-10 p-4 bg-gray-500 text-white rounded cursor-pointer"
+            className="px-6 py-2 ml-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 focus:outline-none"
           >
             Send
           </button>
