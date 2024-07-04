@@ -73,7 +73,7 @@ const Chat = () => {
           className="message-input"
         />
         <button onClick={handleSendMessage} className="send-button">
-          Explore
+          Chat
         </button>
       </div>
     </div>
