@@ -67,7 +67,7 @@ const Chat = () => {
           className="message-input"
         />
         <button onClick={handleSendMessage} className="send-button">
-          Send
+          Explore
         </button>
       </div>
     </div>
