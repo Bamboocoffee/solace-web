@@ -2,12 +2,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './chat.css';
 
-const Chat = () => {
-  const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState('');
-  const messagesEndRef = useRef(null);
+interface Message {
+  id: number;
+  content: string;
+  isUser: boolean;
+}
 
-  const handleInputChange = (e) => {
+const Chat = () => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
   };
 
@@ -18,7 +24,7 @@ const Chat = () => {
         content: inputValue,
         isUser: true,
       };
-      setMessages([...messages, newMessage]);
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
       setInputValue('');
 
       // Simulate assistant response
@@ -37,7 +43,7 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSendMessage();
     }
