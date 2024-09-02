@@ -1,6 +1,6 @@
 /* src/Chat.css */
 body {
-  margin: 0;
+  margin-top: 0;
   font-family: 'Courier New', Courier, monospace;
   background: #000000;
   color: #00ff00;
@@ -12,8 +12,9 @@ body {
   justify-content: space-between;
   width: 100%;
   max-width: 600px;
-  height: 100vh;
+  height: 97.5vh;
   margin: 0 auto;
+  margin-top: 1.25vh;
   background-color: #000000;
   border: 1px solid #00ff00;
   box-shadow: 0 0 10px #00ff00;
