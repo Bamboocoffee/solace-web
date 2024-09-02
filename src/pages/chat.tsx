@@ -31,7 +31,7 @@ const Chat = () => {
       setTimeout(() => {
         const assistantMessage = {
           id: messages.length + 2,
-          content: 'This is a sample response from the assistant.',
+          content: "Thanks for the message. I'm currently still training on Stephen's life. Please check back in later.",
           isUser: false,
         };
         setMessages((prevMessages) => [...prevMessages, assistantMessage]);
@@ -51,7 +51,7 @@ const Chat = () => {
 
   return (
     <div className="chat-container">
-      <div className="chat-header">Matrix Chat</div>
+      <div className="chat-header">You're chatting with "Stephen"</div>
       <div className="chat-messages">
         {messages.map((message) => (
           <div
