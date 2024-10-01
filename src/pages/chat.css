@@ -48,7 +48,7 @@ body {
 }
 
 .user-message {
-  background-color: rgba(0, 255, 0, 0.2);
+  background-color: rgba(0, 255, 0, 0.1);
   align-self: flex-end;
 }
 
@@ -89,4 +89,13 @@ body {
 
 .send-button:hover {
   background-color: #00cc00;
+}
+
+.message-container {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.user-message-container {
+  justify-content: flex-end;
 }
