@@ -35,6 +35,7 @@ const Chat = () => {
           isUser: false,
         };
         setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+        
       }, 500);
     }
   };
@@ -45,7 +46,7 @@ const Chat = () => {
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      handleSendMessage();
+      handleSendMessage(); // Prevent form submission
     }
   };
 
@@ -56,9 +57,11 @@ const Chat = () => {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`message ${message.isUser ? 'user-message' : 'assistant-message'}`}
+            className={`message-container ${message.isUser ? 'user-message-container' : ''}`}
           >
-            {message.content}
+            <div className={`message ${message.isUser ? 'user-message' : 'assistant-message'}`}>
+              {message.content}
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
