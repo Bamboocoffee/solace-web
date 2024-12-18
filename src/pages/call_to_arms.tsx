@@ -8,7 +8,7 @@ const BlackHoleCountdown = () => {
 
     const updateCountdown = () => {
       const now = new Date();
-      const timeLeft = targetDate - now;
+      const timeLeft = targetDate.getTime() - now.getTime();
 
       if (timeLeft <= 0) {
         setTimeRemaining("The black hole has engulfed everything!");
