@@ -3,42 +3,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NextApiRequest, NextApiResponse } from 'next';
 import './chat.css';
 import { useGoogleAnalytics } from "../app/hooks/useGoogleAnalytics";
-
+import { updateGoogleSheet } from '@/app/api/updateGoogleSheet';
+import { openAICompletion } from '@/app/api/openAICompletion';
 
 interface Message {
   id: number;
   content: string;
   isUser: boolean;
 }
-
-const callExternalApi = async (param1: string) => {
-  try {
-    // Build the URL with query parameters
-
-    const params = {
-      message: param1,
-    };
-
-    const url = `http://127.0.0.1:5000/completion/`;
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
-
-    if (!res.ok) {
-      throw new Error(`API error: ${res.status}`);
-    }
-
-    const data = await res.json();
-    return(data.response);
-  } catch (error) {
-    console.error('Error calling external API:', error);
-    return('Error occurred');
-  }
-};
 
 const Chat = () => { 
   const [messages, setMessages] = useState<Message[]>([]); // Initialize messages state
@@ -60,27 +32,37 @@ const Chat = () => {
         isUser: true,
       };
       setMessages((prevMessages) => [...prevMessages, newMessage]); // Add user message to messages state
+      setLoading(true); // Set loading to true
 
-      /* 
-      =========== Uncomment this to test the OpenAPI integrations ===========
-      // setLoading(true); // Set loading to true
-      // const response = await callExternalApi(inputValue); // calls the LLM
-      // setLoading(false); // Set loading to false
+      // =========== Uncomment this to test the OpenAPI integrations ===========
+      // const response = await openAICompletion(inputValue); // calls the LLM
       
       // const assistantResponse = { // constructs the reponse
       //   id: messages.length + 2, // Generate unique ID for each message
       //   content: response,
       //   isUser: false,
       // };
-      =========== Uncomment this to test the OpenAPI integrations ===========
-      */ 
+      // =========== Uncomment this to test the OpenAPI integrations ===========
 
+      //  =========== Uncomment this to Production ===========
+      let response = ""; 
+      try {
+        let apiResponse = await updateGoogleSheet(inputValue)
+        response = "Sheet updated at: " + apiResponse.updatedRange
+        console.log("Success")
+      } catch (error) {
+        let response = "Something went wrong: " + error;
+      }
+
+      setLoading(false); // Set loading to false
       const assistantResponse = { // constructs the reponse
         id: messages.length + 2, // Generate unique ID for each message
-        content: "Currently training on Stephen's life.",
+        content: response,
         isUser: false,
       };
+      //  =========== Uncomment this to Production ===========
 
+      setLoading(false); // Set loading to false
       setMessages((prevMessages) => [...prevMessages, assistantResponse]); // Add assistant message to messages state
       setInputValue(''); // Clear input field
     }
