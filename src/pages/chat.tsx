@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NextApiRequest, NextApiResponse } from 'next';
 import './chat.css';
+import { useGoogleAnalytics } from "../app/hooks/useGoogleAnalytics";
+
 
 interface Message {
   id: number;
@@ -12,9 +14,18 @@ interface Message {
 const callExternalApi = async (param1: string) => {
   try {
     // Build the URL with query parameters
-    const url = `http://127.0.0.1:5000/completion/?param1=${encodeURIComponent(param1)}`;
+
+    const params = {
+      message: param1,
+    };
+
+    const url = `http://127.0.0.1:5000/completion/`;
     const res = await fetch(url, {
-      method: 'GET',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
     });
 
     if (!res.ok) {
@@ -34,6 +45,8 @@ const Chat = () => {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false); // Loading state
+  useGoogleAnalytics(); // Track page views
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value); // Update input value on change
@@ -48,15 +61,19 @@ const Chat = () => {
       };
       setMessages((prevMessages) => [...prevMessages, newMessage]); // Add user message to messages state
 
-      setLoading(true); // Set loading to true
-      const response = await callExternalApi(inputValue); // calls the LLM
-      setLoading(false); // Set loading to false
+      /* 
+      =========== Uncomment this to test the OpenAPI integrations ===========
+      // setLoading(true); // Set loading to true
+      // const response = await callExternalApi(inputValue); // calls the LLM
+      // setLoading(false); // Set loading to false
       
       // const assistantResponse = { // constructs the reponse
       //   id: messages.length + 2, // Generate unique ID for each message
       //   content: response,
       //   isUser: false,
       // };
+      =========== Uncomment this to test the OpenAPI integrations ===========
+      */ 
 
       const assistantResponse = { // constructs the reponse
         id: messages.length + 2, // Generate unique ID for each message
