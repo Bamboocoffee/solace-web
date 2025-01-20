@@ -15,8 +15,8 @@ import { authenticate } from '@/app/api/authentication';
 import { processMessage } from '@/app/helpers/processMessage';
 
 interface Message {
-  id: string;  
-  content: string;
+  id: any;  
+  content: any;
   processedContent: string | null;
   isUser: boolean;
 }
@@ -42,8 +42,11 @@ const Chat = () => {
       handleSendMessage(); // Prevent form submission
     }
   };
-
   
+  /**
+   * Handles the logic for managing user and llm generated messages.
+   * 
+   */
   const handleSendMessage = async() => {
     if (inputValue.trim()) {
       const newMessage: Message = {
@@ -66,20 +69,32 @@ const Chat = () => {
       // =========== Uncomment this to test the OpenAPI integrations ===========
 
       //  =========== Uncomment this to Production ===========
-      try {
-        const apiResponse = await authenticate();
-        const assistantResponse: Message[] = await processMessage(apiResponse, messages.length + 2); // Split and process the response
-        setMessages((prevMessages) => [...prevMessages, ...assistantResponse]);
-      } catch (error) {
-        const errorResponse: Message = {
-          id: messages.length + 2,
-          content: `Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          processedContent: null,
-          isUser: false,
-        };
-        setMessages((prevMessages) => [...prevMessages, errorResponse]);
-      }
+      // try {
+      //   const apiResponse = await authenticate();
+      //   const assistantResponse: Message[] = await processMessage(apiResponse, messages.length + 2); // Split and process the response
+      //   setMessages((prevMessages) => [...prevMessages, ...assistantResponse]);
+      // } catch (error) {
+      //   const errorResponse: Message = {
+      //     id: messages.length + 2,
+      //     content: `Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      //     processedContent: null,
+      //     isUser: false,
+      //   };
+      //   setMessages((prevMessages) => [...prevMessages, errorResponse]);
+      // }
       //  =========== Uncomment this to Production ===========
+
+      //
+      const response = "Still learning..."; // calls the LLM
+      
+      const assistantResponse = { // constructs the reponse
+        id: messages.length + 2, // Generate unique ID for each message
+        content: response,
+        processedContent: null,
+        isUser: false,
+      };
+        setMessages((prevMessages) => [...prevMessages, assistantResponse]);
+
 
       setLoading(false); // Set loading to false
       setInputValue(''); // Clear input field
