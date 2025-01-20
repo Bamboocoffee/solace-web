@@ -36,12 +36,18 @@ const Chat = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); // Scroll to bottom when messages change
   }, [messages]);
-
+  
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSendMessage(); // Prevent form submission
+      window.gtag('event', 'chat_submit_click', {
+        event_category: 'chat',
+        event_label: 'Submit message',
+      });
     }
   };
+
+
   
   /**
    * Handles the logic for managing user and llm generated messages.
@@ -57,6 +63,13 @@ const Chat = () => {
       };
       setMessages((prevMessages) => [...prevMessages, newMessage]); // Add user message to messages state
       setLoading(true); // Set loading to true
+      const handleButtonClick = () => {
+        window.gtag('event', 'button_click', {
+          event_category: 'engagement',
+          event_label: 'Sign Up Button',
+          value: 1, // Optional numerical value
+        });
+      };
 
       // =========== Uncomment this to test the OpenAPI integrations ===========
       // const response = await openAICompletion(inputValue); // calls the LLM
