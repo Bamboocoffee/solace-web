@@ -2,13 +2,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NextApiRequest, NextApiResponse } from 'next';
 import './chat.css';
+
+// Hooks
 import { useGoogleAnalytics } from "../app/hooks/useGoogleAnalytics";
+
+// APIs
 import { updateGoogleSheet } from '@/app/api/updateGoogleSheet';
 import { openAICompletion } from '@/app/api/openAICompletion';
+import { authenticate } from '@/app/api/authentication';
+
+// Helpers
+import { processMessage } from '@/app/helpers/processMessage';
 
 interface Message {
-  id: number;
+  id: string;  
   content: string;
+  processedContent: string | null;
   isUser: boolean;
 }
 
@@ -24,11 +33,23 @@ const Chat = () => {
     setInputValue(e.target.value); // Update input value on change
   };
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); // Scroll to bottom when messages change
+  }, [messages]);
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSendMessage(); // Prevent form submission
+    }
+  };
+
+  
   const handleSendMessage = async() => {
     if (inputValue.trim()) {
-      const newMessage = {
+      const newMessage: Message = {
         id: messages.length + 1, // Generate unique ID for each message
         content: inputValue,
+        processedContent: null,
         isUser: true,
       };
       setMessages((prevMessages) => [...prevMessages, newMessage]); // Add user message to messages state
@@ -45,37 +66,47 @@ const Chat = () => {
       // =========== Uncomment this to test the OpenAPI integrations ===========
 
       //  =========== Uncomment this to Production ===========
-      let response = ""; 
       try {
-        let apiResponse = await updateGoogleSheet(inputValue)
-        response = "Sheet updated at: " + apiResponse.updatedRange
-        console.log("Success")
+        const apiResponse = await authenticate();
+        const assistantResponse: Message[] = await processMessage(apiResponse, messages.length + 2); // Split and process the response
+        setMessages((prevMessages) => [...prevMessages, ...assistantResponse]);
       } catch (error) {
-        let response = "Something went wrong: " + error;
+        const errorResponse: Message = {
+          id: messages.length + 2,
+          content: `Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          processedContent: null,
+          isUser: false,
+        };
+        setMessages((prevMessages) => [...prevMessages, errorResponse]);
       }
-
-      setLoading(false); // Set loading to false
-      const assistantResponse = { // constructs the reponse
-        id: messages.length + 2, // Generate unique ID for each message
-        content: response,
-        isUser: false,
-      };
       //  =========== Uncomment this to Production ===========
 
       setLoading(false); // Set loading to false
-      setMessages((prevMessages) => [...prevMessages, assistantResponse]); // Add assistant message to messages state
       setInputValue(''); // Clear input field
     }
   };
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); // Scroll to bottom when messages change
-  }, [messages]);
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSendMessage(); // Prevent form submission
-    }
+  /**
+   * This function is a worker that correctly formats the stored message as per our desired UX
+   * @param param0 
+   * @returns 
+   */
+  const Message = ({ message }: { message: Message }) => {
+    return (
+      <div
+      className={`message-container ${message.isUser ? 'user-message-container' : ''}`}
+    >
+      <div className={`message ${message.isUser ? 'user-message' : 'assistant-message'}`}>
+        {message.processedContent ? (
+          <div
+            dangerouslySetInnerHTML={{ __html: message.processedContent }}
+          ></div>
+        ) : (
+          message.content
+        )}
+      </div>
+      </div>
+    )
   };
 
   return (
@@ -83,14 +114,7 @@ const Chat = () => {
       <div className="chat-header">You're chatting with "Stephen"</div>
       <div className="chat-messages">
         {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`message-container ${message.isUser ? 'user-message-container' : ''}`}
-          >
-            <div className={`message ${message.isUser ? 'user-message' : 'assistant-message'}`}>
-              {message.content}
-            </div>
-          </div>
+          <Message key={message.id} message={message} />
         ))}
         {loading && (
           <div className="loading-container">

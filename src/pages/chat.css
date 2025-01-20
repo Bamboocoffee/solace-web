@@ -100,6 +100,15 @@ body {
   justify-content: flex-end;
 }
 
+.message a {
+  text-decoration: underline;
+  color: #007bff; /* Optional: Adjust the color for better visibility */
+}
+
+.message a:hover {
+  text-decoration: underline; /* Ensure underline remains on hover */
+  color: #0056b3; /* Optional: Adjust hover color */
+}
 
 .loading-dots {
   display: flex;
