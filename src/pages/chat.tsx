@@ -2,43 +2,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NextApiRequest, NextApiResponse } from 'next';
 import './chat.css';
+
+// Hooks
 import { useGoogleAnalytics } from "../app/hooks/useGoogleAnalytics";
 
+// APIs
+import { updateGoogleSheet } from '@/app/api/updateGoogleSheet';
+import { openAICompletion } from '@/app/api/openAICompletion';
+import { authenticate } from '@/app/api/authentication';
+
+// Helpers
+import { processMessage } from '@/app/helpers/processMessage';
 
 interface Message {
-  id: number;
-  content: string;
+  id: any;  
+  content: any;
+  processedContent: string | null;
   isUser: boolean;
 }
-
-const callExternalApi = async (param1: string) => {
-  try {
-    // Build the URL with query parameters
-
-    const params = {
-      message: param1,
-    };
-
-    const url = `http://127.0.0.1:5000/completion/`;
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
-
-    if (!res.ok) {
-      throw new Error(`API error: ${res.status}`);
-    }
-
-    const data = await res.json();
-    return(data.response);
-  } catch (error) {
-    console.error('Error calling external API:', error);
-    return('Error occurred');
-  }
-};
 
 const Chat = () => { 
   const [messages, setMessages] = useState<Message[]>([]); // Initialize messages state
@@ -52,40 +33,6 @@ const Chat = () => {
     setInputValue(e.target.value); // Update input value on change
   };
 
-  const handleSendMessage = async() => {
-    if (inputValue.trim()) {
-      const newMessage = {
-        id: messages.length + 1, // Generate unique ID for each message
-        content: inputValue,
-        isUser: true,
-      };
-      setMessages((prevMessages) => [...prevMessages, newMessage]); // Add user message to messages state
-
-      /* 
-      =========== Uncomment this to test the OpenAPI integrations ===========
-      // setLoading(true); // Set loading to true
-      // const response = await callExternalApi(inputValue); // calls the LLM
-      // setLoading(false); // Set loading to false
-      
-      // const assistantResponse = { // constructs the reponse
-      //   id: messages.length + 2, // Generate unique ID for each message
-      //   content: response,
-      //   isUser: false,
-      // };
-      =========== Uncomment this to test the OpenAPI integrations ===========
-      */ 
-
-      const assistantResponse = { // constructs the reponse
-        id: messages.length + 2, // Generate unique ID for each message
-        content: "Currently training on Stephen's life.",
-        isUser: false,
-      };
-
-      setMessages((prevMessages) => [...prevMessages, assistantResponse]); // Add assistant message to messages state
-      setInputValue(''); // Clear input field
-    }
-  };
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); // Scroll to bottom when messages change
   }, [messages]);
@@ -95,20 +42,94 @@ const Chat = () => {
       handleSendMessage(); // Prevent form submission
     }
   };
+  
+  /**
+   * Handles the logic for managing user and llm generated messages.
+   * 
+   */
+  const handleSendMessage = async() => {
+    if (inputValue.trim()) {
+      const newMessage: Message = {
+        id: messages.length + 1, // Generate unique ID for each message
+        content: inputValue,
+        processedContent: null,
+        isUser: true,
+      };
+      setMessages((prevMessages) => [...prevMessages, newMessage]); // Add user message to messages state
+      setLoading(true); // Set loading to true
+
+      // =========== Uncomment this to test the OpenAPI integrations ===========
+      // const response = await openAICompletion(inputValue); // calls the LLM
+      
+      // const assistantResponse = { // constructs the reponse
+      //   id: messages.length + 2, // Generate unique ID for each message
+      //   content: response,
+      //   isUser: false,
+      // };
+      // =========== Uncomment this to test the OpenAPI integrations ===========
+
+      //  =========== Uncomment this to Production ===========
+      // try {
+      //   const apiResponse = await authenticate();
+      //   const assistantResponse: Message[] = await processMessage(apiResponse, messages.length + 2); // Split and process the response
+      //   setMessages((prevMessages) => [...prevMessages, ...assistantResponse]);
+      // } catch (error) {
+      //   const errorResponse: Message = {
+      //     id: messages.length + 2,
+      //     content: `Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      //     processedContent: null,
+      //     isUser: false,
+      //   };
+      //   setMessages((prevMessages) => [...prevMessages, errorResponse]);
+      // }
+      //  =========== Uncomment this to Production ===========
+
+      //
+      const response = "Still learning..."; // calls the LLM
+      
+      const assistantResponse = { // constructs the reponse
+        id: messages.length + 2, // Generate unique ID for each message
+        content: response,
+        processedContent: null,
+        isUser: false,
+      };
+        setMessages((prevMessages) => [...prevMessages, assistantResponse]);
+
+
+      setLoading(false); // Set loading to false
+      setInputValue(''); // Clear input field
+    }
+  };
+
+  /**
+   * This function is a worker that correctly formats the stored message as per our desired UX
+   * @param param0 
+   * @returns 
+   */
+  const Message = ({ message }: { message: Message }) => {
+    return (
+      <div
+      className={`message-container ${message.isUser ? 'user-message-container' : ''}`}
+    >
+      <div className={`message ${message.isUser ? 'user-message' : 'assistant-message'}`}>
+        {message.processedContent ? (
+          <div
+            dangerouslySetInnerHTML={{ __html: message.processedContent }}
+          ></div>
+        ) : (
+          message.content
+        )}
+      </div>
+      </div>
+    )
+  };
 
   return (
     <div className="chat-container">
       <div className="chat-header">You're chatting with "Stephen"</div>
       <div className="chat-messages">
         {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`message-container ${message.isUser ? 'user-message-container' : ''}`}
-          >
-            <div className={`message ${message.isUser ? 'user-message' : 'assistant-message'}`}>
-              {message.content}
-            </div>
-          </div>
+          <Message key={message.id} message={message} />
         ))}
         {loading && (
           <div className="loading-container">
