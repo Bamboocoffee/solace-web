@@ -47,7 +47,6 @@ const Chat = () => {
     }
   };
 
-
   
   /**
    * Handles the logic for managing user and llm generated messages.
@@ -63,13 +62,7 @@ const Chat = () => {
       };
       setMessages((prevMessages) => [...prevMessages, newMessage]); // Add user message to messages state
       setLoading(true); // Set loading to true
-      const handleButtonClick = () => {
-        window.gtag('event', 'button_click', {
-          event_category: 'engagement',
-          event_label: 'Sign Up Button',
-          value: 1, // Optional numerical value
-        });
-      };
+  
 
       // =========== Uncomment this to test the OpenAPI integrations ===========
       // const response = await openAICompletion(inputValue); // calls the LLM
@@ -82,31 +75,32 @@ const Chat = () => {
       // =========== Uncomment this to test the OpenAPI integrations ===========
 
       //  =========== Uncomment this to Production ===========
-      // try {
-      //   const apiResponse = await authenticate();
-      //   const assistantResponse: Message[] = await processMessage(apiResponse, messages.length + 2); // Split and process the response
-      //   setMessages((prevMessages) => [...prevMessages, ...assistantResponse]);
-      // } catch (error) {
-      //   const errorResponse: Message = {
-      //     id: messages.length + 2,
-      //     content: `Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      //     processedContent: null,
-      //     isUser: false,
-      //   };
-      //   setMessages((prevMessages) => [...prevMessages, errorResponse]);
-      // }
+      try {
+        const apiResponse = await updateGoogleSheet('46');
+        console.log(apiResponse)
+        const assistantResponse: Message[] = await processMessage(apiResponse, messages.length + 2); // Split and process the response
+        setMessages((prevMessages) => [...prevMessages, ...assistantResponse]);
+      } catch (error) {
+        const errorResponse: Message = {
+          id: messages.length + 2,
+          content: `Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          processedContent: null,
+          isUser: false,
+        };
+        setMessages((prevMessages) => [...prevMessages, errorResponse]);
+      }
       //  =========== Uncomment this to Production ===========
 
       //
-      const response = "Still learning..."; // calls the LLM
+      // const response = "Still learning..."; // calls the LLM
       
-      const assistantResponse = { // constructs the reponse
-        id: messages.length + 2, // Generate unique ID for each message
-        content: response,
-        processedContent: null,
-        isUser: false,
-      };
-        setMessages((prevMessages) => [...prevMessages, assistantResponse]);
+      // const assistantResponse = { // constructs the reponse
+      //   id: messages.length + 2, // Generate unique ID for each message
+      //   content: response,
+      //   processedContent: null,
+      //   isUser: false,
+      // };
+      //   setMessages((prevMessages) => [...prevMessages, assistantResponse]);
 
 
       setLoading(false); // Set loading to false
