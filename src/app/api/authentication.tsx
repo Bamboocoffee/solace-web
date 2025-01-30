@@ -9,6 +9,7 @@ interface ApiResponse {
 // Define the function with proper parameter and return types
 export const authenticate = async (): Promise<string> => {
     try {
+      
       // Build the URL with query parameters
       const params = { message: "attempting to authenticate" };
       const url = `http://127.0.0.1:5000/authenticate/private-token/`;
